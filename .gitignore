@@ -1,3 +1,4 @@
 node_modules/
 log/*.log
 anonymous.sql
+config.json
