@@ -1,0 +1,14 @@
+{
+  "name": "ndbm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "backup": "node backupDb.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "simple-node-logger": "^18.12.24"
+  }
+}
