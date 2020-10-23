@@ -7,15 +7,15 @@ function backupDb(){
 
 	let fname = `${host}-pris-${today.weekday}.bak`;
 	let backupFname = `${config.backupPath}${fname}`;
-	let zbackupFname = `${config.zbackupPath}${fname}.7z`;
+	let zBackupFname = `${config.zbackupPath}${fname}.7z`;
 
 	if (config.runMode == 'wlm'){
 		runsql(`insert into pris.dbo.pos_sales(Product_ID,Quantity,Amount,Date,Notes) values ('1234567890',999,1,getdate(),'system')`);
 	}
 	
-	runsql(`BACKUP DATABASE [pris] TO DISK = N'${backupFname}' WITH INIT, NAME = N'pris-Database Backup ${dt}'`);
+	runsql(`BACKUP DATABASE [pris] TO DISK = N'${backupFname}' WITH INIT, NAME = N'pris-Database Backup ${today.ymd}'`);
 	run(`7z a -t7z -mx9 -p2020 ${zBackupFname} ${backupFname}`)
-	run(`rclone copy ${zbackupFname} automan:mssqlbak-7z`)
+	run(`rclone copy ${zBackupFname} automan:mssqlbak-7z`)
 }
 
 backupDb();
