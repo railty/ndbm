@@ -7,7 +7,7 @@ function backupDb(){
 
 	let fname = `${host}-pris-${today.weekday}.bak`;
 	let backupFname = `${config.backupPath}${fname}`;
-	let zBackupFname = `${config.zbackupPath}${fname}.7z`;
+	let zBackupFname = `${config.zBackupPath}${fname}.7z`;
 
 	if (config.runMode == 'wlm'){
 		runsql(`insert into pris.dbo.pos_sales(Product_ID,Quantity,Amount,Date,Notes) values ('1234567890',999,1,getdate(),'system')`);
