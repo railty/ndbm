@@ -1,5 +1,6 @@
 {
   "runMode": "wlm",
   "backupPath": "D:\\Pris\\Data\\",
-  "zBackupPath": "D:\\automan\\mssqlbak-7z\\"
+  "zBackupPath": "D:\\automan\\mssqlbak-7z\\",
+  "backupDbs": ["pris"]
 }

@@ -18,4 +18,7 @@ function backupDb(){
 	run(`rclone copy ${zBackupFname} automan:mssqlbak-7z`)
 }
 
-backupDb();
+for (let db of config.backupDbs){
+	backupDb();
+}
+
