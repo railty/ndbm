@@ -5,7 +5,7 @@ const fs = require('fs');
 function backupDb(){
 	log.info("backup started");	
 
-	let fname = `${host}-pris-${today.getDay()}.bak`;
+	let fname = `${host}-pris-${today.weekday}.bak`;
 	let backupFname = `${config.backupPath}${fname}`;
 	let zbackupFname = `${config.zbackupPath}${fname}.7z`;
 

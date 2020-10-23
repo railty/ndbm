@@ -11,9 +11,13 @@ Date.prototype.toYMD = function() {
 let host = os.hostname().toLowerCase();
 exports.host = host;
 
-let today = (new Date()).toYMD();
+let td = new Date();
+let today = {
+	ymd: td.toYMD(),
+	weekday: td.getDay()
+}
 
-const log = logger.createSimpleLogger(`log/${host}-${today}.log`);
+const log = logger.createSimpleLogger(`log/${host}-${today.ymd}.log`);
 
 exports.log = log;
 exports.today = today;

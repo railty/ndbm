@@ -44,7 +44,7 @@ for (let db of Object.keys(files)){
 //console.log(dbs);
 
 for (let db of dbs){
-	if (db.tm.toYMD() != today) {
+	if (db.tm.toYMD() != today.ymd) {
 		console.log("cannot find today backup");
 	}
 	else{
