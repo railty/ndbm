@@ -58,7 +58,7 @@ function restoreDb(cfg){
 		console.log("cannot find today backup");
 	}
 	else{
-		//run(`7z x -y -p2020 ${config.zRestorePath}${db.file}.7z -o${config.restorePath}`)
+		run(`7z x -y -p2020 ${config.zRestorePath}${db.file}.7z -o${config.restorePath}`)
 
 		let sql = `
 			BEGIN TRY
@@ -68,11 +68,11 @@ function restoreDb(cfg){
 				print '${db.toDb} not exist';
 			END CATCH;
 			
-			RESTORE DATABASE [${db.toDb}] FROM DISK = N'${config.restorePath}${db.file}' WITH FILE = 1, MOVE N'Pris' TO N'${config.sqlDataPath}${db.toDb}.mdf', MOVE N'Pris_log' TO N'${config.sqlDataPath}${db.toDb}.ldf', NOUNLOAD, STATS = 5;
+			RESTORE DATABASE [${db.toDb}] FROM DISK = N'${config.restorePath}${db.file}' WITH MOVE N'${db.db}' TO N'${config.sqlDataPath}${db.toDb}.mdf', MOVE N'${db.db}_log' TO N'${config.sqlDataPath}${db.toDb}_log.ldf';
 			ALTER DATABASE ${db.toDb} SET MULTI_USER;
 		`;
 		runsql(sql);
-		runsql(`use ${db.toDb}; exec sp_change_users_login 'update_one', 'po', 'po'`);
+		//runsql(`use ${db.toDb}; exec sp_change_users_login 'update_one', 'po', 'po'`);
 	}
 }
 
@@ -87,16 +87,10 @@ function verify(db){
 }
 
 //dl_bak();
-restoreDb({
-	fromServer: 'hqsvr2', 
-	fromDb: 'pris',
-	toDb: 'hqsvr2'
-});
-restoreDb({
-	fromServer: 'wm1117', 
-	fromDb: 'pris',
-	toDb: 'wm1117'
-});
-
-let rc = verify('wm1117')
-console.log(rc);
+for (let db of config.restoreDbs){
+	if (db.active){
+		restoreDb(db);
+		let rc = verify(db.toDb);
+		console.log(rc);
+	}
+}

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "backup": "node backupDb.js"
+    "backup": "node backupDb.js",
+    "restore": "node restoreDb.js"
   },
   "author": "",
   "license": "ISC",

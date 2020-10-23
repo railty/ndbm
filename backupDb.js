@@ -10,7 +10,7 @@ function backupDb(db){
 	let zBackupFname = `${config.zBackupPath}${fname}.7z`;
 
 	if (config.heartbeat){
-		runsql(`insert into pris.dbo.pos_sales(Product_ID,Quantity,Amount,Date,Notes) values ('1234567890',999,1,getdate(),'system')`);
+		runsql(`insert into ${db}.dbo.pos_sales(Product_ID,Quantity,Amount,Date,Notes) values ('1234567890',999,1,getdate(),'system')`);
 	}
 	
 	runsql(`BACKUP DATABASE [${db}] TO DISK = N'${backupFname}' WITH INIT, NAME = N'${db}-Database Backup ${today.ymd}'`);
