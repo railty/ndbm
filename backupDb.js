@@ -1,5 +1,5 @@
 const config = require('./config.json');
-const {run, runsql, log, today} = require('./utils.js');
+const {run, runsql, log, today, host} = require('./utils.js');
 const fs = require('fs'); 
 
 function backupDb(){

@@ -9,6 +9,8 @@ Date.prototype.toYMD = function() {
 };
 
 let host = os.hostname().toLowerCase();
+exports.host = host;
+
 let today = (new Date()).toYMD();
 
 const log = logger.createSimpleLogger(`log/${host}-${today}.log`);
