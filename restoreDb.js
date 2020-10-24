@@ -86,7 +86,7 @@ function verify(db){
 	return (bak_dt == today.ymd);
 }
 
-//dl_bak();
+dl_bak();
 for (let db of config.restoreDbs){
 	if (db.active){
 		restoreDb(db);
