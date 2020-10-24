@@ -10,7 +10,14 @@ function backupDb(db){
 	let zBackupFname = `${config.zBackupPath}${fname}.7z`;
 
 	if (config.heartbeat){
-		runsql(`insert into ${db}.dbo.pos_sales(Product_ID,Quantity,Amount,Date,Notes) values ('1234567890',999,1,getdate(),'system')`);
+		if (config.heartbeat == 'wlm'){
+			runsql(`insert into ${db}.dbo.pos_sales(Product_ID,Quantity,Amount,Date,Notes) values ('1234567890',999,1,getdate(),'system')`);
+		}
+		if (config.heartbeat == 'alp'){
+			runsql("exec Pris.Dbo.Refresh_POS @Full=1")
+			runsql("exec Pris.Dbo.Calculate_Sales")
+			runsql("exec Pris.Dbo.Build_Inventory")
+		}
 	}
 	
 	runsql(`BACKUP DATABASE [${db}] TO DISK = N'${backupFname}' WITH INIT, NAME = N'${db}-Database Backup ${today.ymd}'`);
