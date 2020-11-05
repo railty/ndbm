@@ -2,5 +2,6 @@
   "heartbeat": "wlm|alp",
   "backupPath": "D:\\Pris\\Data\\",
   "zBackupPath": "D:\\automan\\mssqlbak-7z\\",
-  "backupDbs": ["pris"]
+  "backupDbs": ["pris"],
+  "gPath": "data:mssqlbak-7z",
 }
