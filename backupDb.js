@@ -22,7 +22,7 @@ function backupDb(db){
 	
 	runsql(`BACKUP DATABASE [${db}] TO DISK = N'${backupFname}' WITH INIT, NAME = N'${db}-Database Backup ${today.ymd}'`);
 	run(`7z a -t7z -mx9 -p2020 ${zBackupFname} ${backupFname}`)
-	run(`rclone copy ${zBackupFname} ${config.gPath}`)
+	run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
 }
 
 for (let db of config.backupDbs){
