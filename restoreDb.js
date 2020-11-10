@@ -1,10 +1,6 @@
 const config = require('./config.json');
-const {run, runsql, log, today} = require('./utils.js');
+const {run, runsql, log, today, yesterday} = require('./utils.js');
 const fs = require('fs'); 
-
-function dl_bak(){
-	run(`rclone copy automan:mssqlbak-7z ${config.zRestorePath}`)
-}
 
 function getBakList(){
 	let files = fs.readdirSync(config.zRestorePath);
@@ -46,7 +42,7 @@ function getBakList(){
 	return dbs;	
 }
 
-function restoreDb(cfg){
+function restoreDb2(cfg){
 	let dbs = getBakList();
 	//console.log(dbs);
 
@@ -78,7 +74,6 @@ function restoreDb(cfg){
 
 function verify(db){
 	let rc = runsql(`select top 1 Date, Notes from ${db}.dbo.pos_sales order by date desc`);
-	console.log("-----------------");
 	let ls = rc.split('\n');
 	let l = ls[2].trim();
 	ls = l.split(/\s/);
@@ -86,11 +81,136 @@ function verify(db){
 	return (bak_dt == today.ymd);
 }
 
-dl_bak();
-for (let db of config.restoreDbs){
-	if (db.active){
-		restoreDb(db);
-		let rc = verify(db.toDb);
-		console.log(rc);
+function restoreDb(dbCfg){
+	//console.log(dbCfg);
+	let success = dbCfg.verify();
+	if (!success)	{
+		dbCfg.restoreBakFile();
+		success = dbCfg.verify();
+	}
+	
+	if (success){
+		console.log(`up to date: database ${dbCfg.fromServer}-${dbCfg.fromDb} is restored as ${dbCfg.toDb}`);			
+	}
+	else{
+		console.log(`NOT up to date: database ${dbCfg.fromServer}-${dbCfg.fromDb}`);
+	}
+}
+
+function dl_zbak(){
+	let tsf = `${config.zRestorePath}timestamp.txt`;
+
+	let bOutdated = false;
+	try {
+		let strDate = fs.readFileSync(tsf, "utf8");
+		let dt = new Date(strDate)
+		//console.log(strDate);
+
+		bOutdated = (new Date()-dt)/1000 > 60*60*1;
+	}
+	catch(ex)
+	{
+		console.log(ex.toString());
+		bOutdated = true;
+	}
+
+	if (bOutdated){
+		console.log(`downloading...`);
+		run(`rclone copy ${config.gPath} ${config.zRestorePath}`)
+	
+		console.log(`${config.zRestorePath}timestamp.txt`);
+		let strDate = (new Date()).toISOString()
+		fs.writeFileSync(tsf, strDate, "utf8");
+	}
+}
+
+function patch(dbCfg){
+	dbCfg.latestZBakFile = function(){
+		return this.latestFile(config.zRestorePath)
+	}
+	
+	dbCfg.latestBakFile = function(){
+		let latestBakFile = this.latestFile(config.restorePath);
+		//console.log(latestBakFile);
+		if (!latestBakFile){
+			let latestZBakFile = this.latestZBakFile();
+			this.unzipZBakFile(latestZBakFile);
+			latestBakFile = this.latestFile(config.restorePath);
+		}
+		return latestBakFile;
+	}
+	
+	dbCfg.latestFile = function(path){
+		let files = fs.readdirSync(path);
+		files = files.filter(f=>f.includes(`${this.fromServer}-${this.fromDb}`));
+		let files2 = [];
+		for (let f of files){
+			let stats = fs.statSync(`${path}${f}`);
+			files2.push({
+				name: f, 
+				sz: stats.size, 
+				tm: stats.mtime,
+				toDb: this.toDb,
+				data: this.data,
+				log: this.log
+			});
+		}
+		files2 = files2.sort((a, b)=>{return b.tm-a.tm});
+		let file = files2[0];
+		return file;
+	}
+
+	dbCfg.unzipZBakFile = function(db){
+		//console.log(db);
+		let cmd = `7z x -y -p2020 ${config.zRestorePath}${db.name} -o${config.restorePath}`;
+		run(cmd);
+	}
+
+	dbCfg.restoreBakFile = function(){
+		this.unzipZBakFile(this.latestZBakFile())
+
+		let cfg = this.latestBakFile();
+		console.log(`restoring ${cfg.toDb}`);
+		//console.log(cfg);
+		let sql = `
+			BEGIN TRY
+				ALTER DATABASE ${cfg.toDb} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+			END TRY
+			BEGIN CATCH
+				print '${cfg.toDb} not exist';
+			END CATCH;
+			
+			RESTORE DATABASE [${cfg.toDb}] FROM DISK = N'${config.restorePath}${cfg.name}' WITH REPLACE, MOVE N'${cfg.data}' TO N'${config.sqlDataPath}${cfg.toDb}.mdf', MOVE N'${cfg.log}' TO N'${config.sqlDataPath}${cfg.toDb}_log.ldf';
+			ALTER DATABASE ${cfg.toDb} SET MULTI_USER;
+		`;
+
+		//console.log(sql);
+		runsql(sql);
+	}
+
+	dbCfg.updatedAt = function(){
+		let rc = runsql(`select top 1 Date, Notes from ${this.toDb}.dbo.pos_sales order by date desc`);
+		let ls = rc.split('\n');
+		let l = ls[2].trim();
+		ls = l.split(/\s/);
+		let bak_dt = ls[0];
+		return bak_dt;
+	}
+
+	dbCfg.verify = function(){
+		let updatedAt = this.updatedAt();
+		if (updatedAt && (updatedAt == today.ymd || updatedAt == yesterday.ymd)) return true;
+		return false;
+	}
+}
+
+dl_zbak();
+
+for (let dbCfg of config.restoreDbs){
+	if (dbCfg.active){
+		patch(dbCfg);
+		restoreDb(dbCfg);
+		//let rc = verify(db.toDb);
+		//console.log(rc);
 	}
 }
