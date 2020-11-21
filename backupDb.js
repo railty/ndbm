@@ -27,8 +27,6 @@ function backupDb(db){
 }
 
 try{
-	run('\"C:\\Program Files\\Google\\Drive File Stream\\43.0.8.0\\GoogleDriveFS.exe\"');
-	
 	for (let db of config.backupDbs){
 		backupDb(db);
 	}
