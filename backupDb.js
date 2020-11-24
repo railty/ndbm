@@ -22,13 +22,18 @@ function backupDb(db){
 	
 	runsql(`BACKUP DATABASE [${db}] TO DISK = N'${backupFname}' WITH INIT, NAME = N'${db}-Database Backup ${today.ymd}'`);
 	run(`7z a -t7z -mx9 -p2020 ${zBackupFname} ${backupFname}`)
-	run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
-	run(`copy ${zBackupFname} \"g:\\my drive\\DBBackup\\${host}\\\" `)
+	
+	if (config.heartbeat){
+		if (config.heartbeat == 'wlm'){
+			run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
+		}
+		if (config.heartbeat == 'alp'){
+			run(`copy ${zBackupFname} \"g:\\my drive\\DBBackup\\${host}\\\" `)
+		}
+	}
 }
 
 try{
-	run('\"C:\\Program Files\\Google\\Drive File Stream\\43.0.8.0\\GoogleDriveFS.exe\"');
-	
 	for (let db of config.backupDbs){
 		backupDb(db);
 	}
