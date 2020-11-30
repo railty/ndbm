@@ -31,6 +31,7 @@ function backupDb(db){
 			}
 			catch(e){
 				//if fail, try again
+				run(`sleep 30`)
 				run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
 			}
 
