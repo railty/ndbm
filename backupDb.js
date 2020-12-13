@@ -24,12 +24,15 @@ function backupDb(db){
 	run(`7z a -t7z -mx9 -p2020 ${zBackupFname} ${backupFname}`)
 	
 	if (config.heartbeat){
+		run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
+		/*
 		if (config.heartbeat == 'wlm'){
 			run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
 		}
 		if (config.heartbeat == 'alp'){
 			run(`copy ${zBackupFname} \"g:\\my drive\\DBBackup\\${host}\\\" `)
 		}
+		*/
 	}
 }
 
