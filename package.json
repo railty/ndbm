@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "backup": "node backupDb.js",
-    "restore": "node restoreDb.js"
+    "restore": "node restoreDb.js",
+    "syncStore": "node syncStore.js",
+    "activeProduct": "node activeProduct.js"
   },
   "author": "",
   "license": "ISC",
