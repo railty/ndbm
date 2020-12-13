@@ -24,7 +24,14 @@ function backupDb(db){
 	run(`7z a -t7z -mx9 -p2020 ${zBackupFname} ${backupFname}`)
 	
 	if (config.heartbeat){
-		run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
+		try{
+			run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
+		}
+		catch(e){
+			//if fail, try again
+			run(`sleep 30`)
+			run(`rclone copy ${zBackupFname} ${config.gPath} --log-file=log/r.log --log-level INFO`)
+		}
 		/*
 		if (config.heartbeat == 'wlm'){
 
